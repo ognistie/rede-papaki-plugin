@@ -1,0 +1,14 @@
+{
+  "name": "rede-papaki",
+  "description": "Plugins internos da Papaki para governança de IA.",
+  "owner": {
+    "name": "Time de IA Papaki"
+  },
+  "plugins": [
+    {
+      "name": "rede-papaki",
+      "source": "./rede-papaki",
+      "description": "Skill da Rede Papaki + conexão MCP com o vault da equipe (Políticas e Documentação + pasta da equipe)."
+    }
+  ]
+}

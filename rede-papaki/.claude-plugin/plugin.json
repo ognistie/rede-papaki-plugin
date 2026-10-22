@@ -1,0 +1,24 @@
+{
+  "name": "rede-papaki",
+  "displayName": "Rede Papaki",
+  "version": "1.4.1",
+  "description": "Documentar, consultar e analisar processos de IA no Segundo Cérebro da equipe. Conecta o vault por MCP com acesso só a Políticas e Documentação + pasta da equipe.",
+  "author": {
+    "name": "Time de IA Papaki"
+  },
+  "userConfig": {
+    "vault": {
+      "type": "directory",
+      "title": "Pasta do vault Rede Papaki",
+      "description": "Pasta que contém '00 Políticas e Documentação' e as pastas das equipes (ex.: \\\\SERVIDOR\\Compartilhado\\Rede Papaki).",
+      "required": true
+    },
+    "equipe": {
+      "type": "string",
+      "title": "Sua equipe",
+      "description": "Pasta da sua equipe no vault. O acesso real é garantido pelas permissões da pasta compartilhada.",
+      "options": ["01 RH", "02 Financeiro", "03 Administração", "04 IA"],
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "rede-papaki": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/isolar-pastas.js",
+        "cmd",
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem@2026.8.31",
+        "${user_config.vault}/00 Políticas e Documentação",
+        "${user_config.vault}/${user_config.equipe}"
+      ]
+    }
+  }
+}

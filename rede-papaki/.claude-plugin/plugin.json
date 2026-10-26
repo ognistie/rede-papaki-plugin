@@ -1,8 +1,8 @@
 {
   "name": "rede-papaki",
   "displayName": "Rede Papaki",
-  "version": "1.4.1",
-  "description": "Documentar, consultar e analisar processos de IA no Segundo Cérebro da equipe. Conecta o vault por MCP com acesso só a Políticas e Documentação + pasta da equipe.",
+  "version": "1.5.0",
+  "description": "Documentar, consultar e analisar processos de IA no Segundo Cérebro. Conecta o vault por MCP só com as pastas do escopo do usuário (setor, todos os setores ou administrador).",
   "author": {
     "name": "Time de IA Papaki"
   },
@@ -19,6 +19,13 @@
       "description": "Pasta da sua equipe no vault. O acesso real é garantido pelas permissões da pasta compartilhada.",
       "options": ["01 RH", "02 Financeiro", "03 Administração", "04 IA"],
       "required": true
+    },
+    "escopo": {
+      "type": "string",
+      "title": "Escopo de acesso",
+      "description": "setor: só Políticas + sua equipe (padrão). todos-os-setores: Políticas + as 4 equipes (RH). administrador: tudo, inclusive 99 Gestão (Time de IA). Gravação é sempre só no _Entrada da sua equipe.",
+      "options": ["setor", "todos-os-setores", "administrador"],
+      "default": "setor"
     }
   }
 }

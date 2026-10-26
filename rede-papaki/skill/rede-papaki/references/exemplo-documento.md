@@ -5,8 +5,8 @@
 ````markdown
 ---
 id: FIN-PRC-001
-titulo: Conciliação bancária mensal assistida por IA
-resumo: Cruza extrato bancário e lançamentos do ERP com o Claude e lista divergências para o analista conferir e lançar.
+titulo: "Conciliação bancária mensal assistida por IA"
+resumo: "Cruza extrato bancário e lançamentos do ERP com o Claude e lista divergências para o analista conferir e lançar."
 area: FIN
 tipo: processo
 status: aprovado

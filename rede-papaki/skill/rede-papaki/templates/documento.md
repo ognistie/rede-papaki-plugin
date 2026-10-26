@@ -1,13 +1,13 @@
 ---
 id: {{AREA}}-{{TIPO}}-{{NNN}}
-titulo: {{Título curto: verbo + objeto, ex. "Conciliar extrato bancário com o ERP"}}
-resumo: {{Uma frase de até 160 caracteres: o que faz, para quem e qual ganho}}
+titulo: "{{Título curto: verbo + objeto, ex. \"Conciliar extrato bancário com o ERP\"}}"
+resumo: "{{Uma frase de até 160 caracteres: o que faz, para quem e qual ganho}}"
 area: {{RH|FIN|ADM|IA}}
 tipo: {{processo|automacao|prompt|ferramenta}}
 status: rascunho
 versao: 1.0.0
-responsavel: {{Nome ou função de quem opera}}
-curador: {{Curador da equipe ou A confirmar}}
+responsavel: "{{Nome ou função de quem opera}}"
+curador: "{{Curador da equipe ou A confirmar}}"
 ferramentas: [{{Ferramenta 1}}, {{Ferramenta 2}}]
 frequencia: {{diaria|semanal|mensal|sob-demanda|por-evento}}
 revisao_humana: {{sim|nao}}

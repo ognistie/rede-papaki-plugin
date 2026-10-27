@@ -8,7 +8,7 @@
     {
       "name": "rede-papaki",
       "source": "./rede-papaki",
-      "description": "Skill da Rede Papaki + conexão MCP com o vault da equipe (Políticas e Documentação + pasta da equipe)."
+      "description": "Skill da Rede Papaki + conexão MCP com o vault só com as pastas do escopo do usuário (setor, todos os setores ou administrador) + trava de gravação em _Entrada."
     }
   ]
 }

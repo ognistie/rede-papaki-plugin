@@ -23,7 +23,7 @@ tags: [area/{{rh|fin|adm|ia}}, tipo/{{processo|automacao|prompt|ferramenta}}]
 # {{ID}} — {{Título}}
 
 > [!info] Ficha rápida
-> **Endereço:** [[_Mapa {{Nome da equipe}}]] › {{Pasta do tipo}} › {{ID}}
+> **Endereço:** [[_Mapa {{Nome da equipe}}]] › {{Pasta do tipo}} › {{Assunto}} › {{ID}}
 > **Status:** 🟠 rascunho · **Versão:** 1.0.0 · **Responsável:** {{Nome}}
 > **O que faz:** {{mesmo texto do resumo}}
 > **Quando:** {{gatilho}} · {{frequência}}

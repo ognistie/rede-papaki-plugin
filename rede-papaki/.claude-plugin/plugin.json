@@ -1,7 +1,7 @@
 {
   "name": "rede-papaki",
   "displayName": "Rede Papaki",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "Documentar, consultar e analisar processos de IA no Segundo Cérebro. Conecta o vault por MCP só com as pastas do escopo do usuário (setor, todos os setores ou administrador).",
   "author": {
     "name": "Time de IA Papaki"

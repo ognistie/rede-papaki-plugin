@@ -28,7 +28,7 @@ tags: [area/fin, tipo/processo, exemplo]
 # FIN-PRC-001 — Conciliação bancária mensal assistida por IA
 
 > [!info] Ficha rápida
-> **Endereço:** [[_Mapa Financeiro]] › Processos › FIN-PRC-001
+> **Endereço:** [[_Mapa Financeiro]] › Processos › Conciliação bancária mensal assistida por IA › FIN-PRC-001
 > **Status:** 🟢 aprovado · **Versão:** 1.1.0 · **Responsável:** Analista Financeiro (exemplo)
 > **O que faz:** Cruza extrato bancário e lançamentos do ERP com o Claude e lista divergências para o analista conferir e lançar.
 > **Quando:** fechamento do mês · mensal (até o 3º dia útil)

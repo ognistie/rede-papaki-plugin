@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Trava de gravação da Rede Papaki: hook PreToolUse sobre as ferramentas do MCP deste plugin.
-// Leitura passa. Gravação só cria um documento novo, no padrão de nome e sem dado sensível, em
-// <vault>/<equipe>/_Entrada/, e sempre pede a aprovação da pessoa ("ask"). Todo o resto é bloqueado.
+// Leitura passa. Gravação só cria um documento novo, no padrão de nome e sem dado sensível, numa pasta
+// de assunto em <vault>/<equipe>/_Entrada/<Assunto>/, e sempre pede a aprovação da pessoa ("ask").
+// create_directory só cria essa pasta de assunto. Todo o resto é bloqueado.
 // Recebe o evento em JSON pelo stdin; bloqueia com exit 2 e o motivo no stderr (o motivo vai para o Claude).
 'use strict';
 
@@ -23,7 +24,11 @@ const LEITURA = new Set([
 ]);
 const AREA_DA_PASTA = { '01 RH': 'RH', '02 Financeiro': 'FIN', '03 Administração': 'ADM', '04 IA': 'IA' };
 const LIMITE_BYTES = 200 * 1024;
-const RE_NOME = /^(RH|FIN|ADM|IA)-(PRC|AUT|PRM|FER)-(\d{3}) [^\\/:*?"<>|]+?( \(v\d+\.\d+\.\d+\))?\.md$/;
+// Nome do documento: "<ID> <Título> <AAAA-MM-DD>.md"; todo documento novo tem ID próprio (sem sufixo de versão).
+// Mesmo padrão do validador (tools/rede_papaki.py: RE_NOME_DOC, RE_ASSUNTO).
+const RE_NOME = /^(RH|FIN|ADM|IA)-(PRC|AUT|PRM|FER)-(\d{3}) [^\\/:*?"<>|]+? (\d{4}-\d{2}-\d{2})\.md$/;
+// Pasta de assunto (o "domínio" do documento): até 80 caracteres, sem começar por "_" ou "." nem terminar em espaço ou ".".
+const RE_ASSUNTO = /^[^\\/:*?"<>|_. ][^\\/:*?"<>|]{0,78}[^\\/:*?"<>|. ]$|^[^\\/:*?"<>|_. ]$/;
 
 // Mesmas regras de bloqueio do validador (tools/rede_papaki.py: PADROES_SEGREDO, RE_CPF, RE_CNPJ).
 const SENSIVEIS = [
@@ -78,6 +83,20 @@ function documentosDaEquipe(raiz) {
   return nomes;
 }
 
+function hojeLocal() {
+  const d = new Date();
+  const dois = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${dois(d.getMonth() + 1)}-${dois(d.getDate())}`;
+}
+
+/** Valor de uma propriedade no cabeçalho (frontmatter) do documento, ou null. */
+function propriedade(conteudo, nome) {
+  const cabecalho = /^---\r?\n([\s\S]*?)\r?\n---\s*(\r?\n|$)/.exec(conteudo.replace(/^﻿/, ''));
+  if (!cabecalho) return null;
+  const linha = new RegExp(`^${nome}:[ \\t]*(.*?)[ \\t]*$`, 'm').exec(cabecalho[1]);
+  return linha ? linha[1].replace(/^(["'])(.*)\1$/, '$2') : null;
+}
+
 function pedirAprovacao(motivo) {
   return { decisao: 'ask', motivo };
 }
@@ -90,7 +109,7 @@ function bloquear(motivo) {
 function decidir(evento, env) {
   const ferramenta = String(evento.tool_name || '').split('__').pop();
   if (LEITURA.has(ferramenta)) return null;
-  if (ferramenta !== 'write_file') {
+  if (ferramenta !== 'write_file' && ferramenta !== 'create_directory') {
     return bloquear(`"${ferramenta}" está bloqueado. A Rede só cria documentos novos em _Entrada; nunca edita, move nem apaga.`);
   }
 
@@ -103,38 +122,58 @@ function decidir(evento, env) {
 
   const entrada = evento.tool_input || {};
   const alvo = String(entrada.path || '');
-  const conteudo = String(entrada.content || '');
-  if (!path.isAbsolute(alvo)) return bloquear('informe o caminho absoluto do arquivo dentro de _Entrada.');
-
+  if (!path.isAbsolute(alvo)) return bloquear('informe o caminho absoluto dentro de _Entrada.');
   const pastaEntrada = real(path.join(vault, equipe, '_Entrada'));
-  const pasta = real(path.dirname(alvo));
-  if (!pastaEntrada || !pasta || chave(pastaEntrada) !== chave(pasta)) {
-    return bloquear(`só é permitido gravar direto em "${equipe}/_Entrada/".`);
-  }
-  if (existe(alvo)) return bloquear('já existe um arquivo com esse nome em _Entrada. Não sobrescreva; proponha o próximo ID.');
+  const foraDoPadrao = `só é permitido gravar em "${equipe}/_Entrada/<Assunto>/".`;
 
+  if (ferramenta === 'create_directory') {
+    const assunto = path.basename(alvo).normalize('NFC');
+    const mae = real(path.dirname(alvo));
+    if (!pastaEntrada || !mae || chave(mae) !== chave(pastaEntrada)) return bloquear(foraDoPadrao);
+    if (!RE_ASSUNTO.test(assunto)) {
+      return bloquear(`nome de pasta de assunto inválido: "${assunto}". Use o nome do assunto, até 80 caracteres, sem \\ / : * ? " < > | e sem começar por "_" ou ".".`);
+    }
+    return null;
+  }
+
+  const conteudo = String(entrada.content || '');
+  const pasta = real(path.dirname(alvo));
+  if (pastaEntrada && pasta && chave(pasta) === chave(pastaEntrada)) {
+    return bloquear(`grave dentro de uma pasta de assunto: "${equipe}/_Entrada/<Assunto>/". Se ela não existir, crie com create_directory.`);
+  }
+  const mae = pasta && real(path.dirname(pasta));
+  if (!pastaEntrada || !mae || chave(mae) !== chave(pastaEntrada)) return bloquear(foraDoPadrao);
+  const assunto = path.basename(pasta).normalize('NFC');
+  if (!RE_ASSUNTO.test(assunto)) return bloquear(`pasta de assunto fora do padrão: "${assunto}".`);
+  if (existe(alvo)) return bloquear('já existe um arquivo com esse nome. Não sobrescreva; use o próximo ID livre.');
+
+  const hoje = hojeLocal();
   const nome = path.basename(alvo).normalize('NFC');
   const partes = RE_NOME.exec(nome);
   if (!partes) {
-    return bloquear(`nome fora do padrão. Use "${area}-<PRC|AUT|PRM|FER>-<NNN> <Título>.md" (ou "… (vX.Y.Z).md" para nova versão).`);
+    return bloquear(`nome fora do padrão. Use "${area}-<PRC|AUT|PRM|FER>-<NNN> <Título> ${hoje}.md" (ID novo, título e a data de hoje).`);
   }
   if (partes[1] !== area) return bloquear(`o ID precisa ser da área ${area} (${equipe}); recebido ${partes[1]}.`);
+  if (partes[4] !== hoje) return bloquear(`a data no fim do nome precisa ser a de hoje (${hoje}); recebido ${partes[4]}.`);
 
   const id = `${partes[1]}-${partes[2]}-${partes[3]}`;
-  const usado = documentosDaEquipe(path.join(vault, equipe)).some((n) => n === `${id}.md` || n.startsWith(`${id} `));
-  if (!partes[4] && usado) return bloquear(`o ID ${id} já existe na equipe. Use o próximo número livre.`);
-  if (partes[4] && !usado) return bloquear(`nova versão de ${id}, mas esse ID não existe na equipe.`);
+  if (documentosDaEquipe(path.join(vault, equipe)).some((n) => n === `${id}.md` || n.startsWith(`${id} `))) {
+    return bloquear(`o ID ${id} já existe na equipe. Todo documento novo, inclusive a continuação de um assunto, usa o próximo número livre.`);
+  }
 
   if (Buffer.byteLength(conteudo, 'utf8') > LIMITE_BYTES) return bloquear('documento maior que 200 KB.');
-  if (!new RegExp(`^---[\\s\\S]*?^id:\\s*["']?${id}["']?\\s*$`, 'm').test(conteudo.replace(/^﻿/, ''))) {
+  if (propriedade(conteudo, 'id') !== id) {
     return bloquear(`o cabeçalho do documento precisa ter "id: ${id}", igual ao nome do arquivo.`);
+  }
+  if (propriedade(conteudo, 'criado') !== hoje) {
+    return bloquear(`o cabeçalho do documento precisa ter "criado: ${hoje}", igual à data do nome.`);
   }
   const achados = SENSIVEIS.filter(([, padrao]) => padrao.test(conteudo)).map(([rotulo]) => rotulo);
   if (achados.length) {
     return bloquear(`dado sensível no texto (${achados.join(', ')}). Troque por {{DADO_PESSOAL: tipo}} ou {{SEGREDO: nome}} e tente de novo.`);
   }
 
-  return pedirAprovacao(`Rede Papaki: anexar "${nome}" em ${equipe}/_Entrada? Confira a prévia antes de aprovar.`);
+  return pedirAprovacao(`Rede Papaki: anexar "${nome}" em ${equipe}/_Entrada/${assunto}? Confira a prévia antes de aprovar.`);
 }
 
 function main() {

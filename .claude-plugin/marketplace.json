@@ -8,7 +8,7 @@
     {
       "name": "rede-papaki",
       "source": "./rede-papaki",
-      "description": "Skill da Rede Papaki + conexão MCP com o vault só com as pastas do escopo do usuário (setor, todos os setores ou administrador) + trava de gravação em _Entrada."
+      "description": "Skill da Rede Papaki + conector do servidor MCP remoto (login Google @papaki.com.br; escopo e trava de gravação aplicados no servidor)."
     }
   ]
 }

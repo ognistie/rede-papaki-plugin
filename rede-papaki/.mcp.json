@@ -1,22 +1,8 @@
 {
   "mcpServers": {
     "rede-papaki": {
-      "command": "node",
-      "args": [
-        "${CLAUDE_PLUGIN_ROOT}/mcp/isolar-pastas.js",
-        "--vault",
-        "${user_config.vault}",
-        "--equipe",
-        "${user_config.equipe}",
-        "--escopo",
-        "${user_config.escopo}",
-        "--",
-        "cmd",
-        "/c",
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-filesystem@2026.8.31"
-      ]
+      "type": "http",
+      "url": "https://rede-papaki.PREENCHER.workers.dev/mcp"
     }
   }
 }

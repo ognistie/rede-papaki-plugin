@@ -2,7 +2,7 @@
   "mcpServers": {
     "rede-papaki": {
       "type": "http",
-      "url": "https://rede-papaki.PREENCHER.workers.dev/mcp"
+      "url": "https://rede-papaki.papakii.workers.dev/mcp"
     }
   }
 }
